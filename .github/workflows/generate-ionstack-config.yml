@@ -6,6 +6,9 @@ on:
       rom_url:
         description: 'Firmware/ROM download URL (.zip / .tar.gz / payload.bin / boot.img)'
         required: true
+      build_label:
+        description: 'Build label for config filename (e.g. eureka_q3_52270740038100520)'
+        required: true
       base_address:
         description: 'kimage_text_base (ARM64 kernel base address)'
         required: false
@@ -285,3 +288,24 @@ jobs:
           name: kernel-elf-debug
           path: kernel.elf
           retention-days: 3
+
+      # ============================================================
+      # Commit config to configs/ directory
+      # ============================================================
+      - name: Commit config to repo
+        run: |
+          BUILD_LABEL="${{ inputs.build_label }}"
+          mkdir -p configs
+          cp ionstack.conf "configs/${BUILD_LABEL}.conf"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "configs/${BUILD_LABEL}.conf"
+
+          if git diff --cached --quiet; then
+            echo "[*] Config unchanged, skipping commit"
+          else
+            git commit -m "configs: add offsets for ${BUILD_LABEL}"
+            git push
+            echo "[+] Committed configs/${BUILD_LABEL}.conf"
+          fi
