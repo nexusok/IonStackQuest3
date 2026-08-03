@@ -22,6 +22,9 @@ on:
         required: false
         default: 'https://github.com/topjohnwu/Magisk/releases/latest/download/app-debug.apk'
 
+permissions:
+  contents: write
+
 jobs:
   generate-config:
     runs-on: ubuntu-latest
